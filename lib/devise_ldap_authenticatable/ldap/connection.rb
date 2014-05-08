@@ -13,7 +13,7 @@ module Devise
         @ldap.host = ldap_config["host"]
         @ldap.port = ldap_config["port"]
         @ldap.base = ldap_config["base"]
-        @ldap.base = base if base_override
+        @ldap.base = base_override if base_override
 
         @attribute = ldap_config["attribute"]
         @ldap_auth_username_builder = params[:ldap_auth_username_builder]
