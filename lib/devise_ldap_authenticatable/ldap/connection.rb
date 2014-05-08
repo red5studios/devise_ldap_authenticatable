@@ -3,7 +3,7 @@ module Devise
     class Connection
       attr_reader :ldap, :login
 
-      def initialize(params = {})
+      def initialize(params = {},base_override = nil)
         ldap_config = YAML.load(ERB.new(File.read(::Devise.ldap_config || "#{Rails.root}/config/ldap.yml")).result)[Rails.env]
         ldap_options = params
         ldap_config["ssl"] = :simple_tls if ldap_config["ssl"] === true
@@ -13,6 +13,8 @@ module Devise
         @ldap.host = ldap_config["host"]
         @ldap.port = ldap_config["port"]
         @ldap.base = ldap_config["base"]
+        @ldap.base = base if base_override
+
         @attribute = ldap_config["attribute"]
         @ldap_auth_username_builder = params[:ldap_auth_username_builder]
 

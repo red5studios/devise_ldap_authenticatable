@@ -11,8 +11,14 @@ module Devise
                    :ldap_auth_username_builder => ::Devise.ldap_auth_username_builder,
                    :admin => ::Devise.ldap_use_admin_to_bind}
 
-        resource = Devise::LDAP::Connection.new(options)
-        resource.authorized?
+        ldap_config = YAML.load(ERB.new(File.read(::Devise.ldap_config || "#{Rails.root}/config/ldap.yml")).result)[Rails.env]
+        [ldap_config["base"]].flatten.compact.each do |base|      
+          # Initializer now accepts a second parameter: base
+          resource = Devise::LDAP::Connection.new(options, base)
+          return true if resource.authorized?
+        end
+
+        return false
       end
 
       def self.update_password(login, new_password)
@@ -34,7 +40,13 @@ module Devise
                    :ldap_auth_username_builder => ::Devise.ldap_auth_username_builder,
                    :admin => ::Devise.ldap_use_admin_to_bind}
 
-        resource = Devise::LDAP::Connection.new(options)
+        ldap_config = YAML.load(ERB.new(File.read(::Devise.ldap_config || "#{Rails.root}/config/ldap.yml")).result)[Rails.env]
+        [ldap_config["base"]].flatten.compact.each do |base|      
+          resource = Devise::LDAP::Connection.new(options, base)
+          return resource if resource.valid_login?
+        end
+
+        return false
       end
 
       def self.valid_login?(login)
